@@ -21,20 +21,7 @@ app.get('/buscar', async (req, res) => {
     const $ = cheerio.load(response.data);
     const productos = [];
 
-    if($('.base').text().trim()){
-        //con la descripcion encontro 1 solo resultado. De esta manera la pagina tiene otra estructura
-         const nombre = $('.base').text().trim()
-         const precio = $('span#price-including-tax-product-price-42661 > span.price').text().trim();
-
-         let urlImagenProcesada = ''
-
-         productos.push({
-                origen: 'Cetrogar',
-                nombre:nombre,
-                precio:precio,
-                urlProducto:urlImagenProcesada
-            })
-    }else{
+    if($('.base').text().trim().includes('Resultados de búsqueda para')){
         //son varios resultados
         $('li.item.product').each(function() {
             const nombre = $(this).find('.product-item-name .name-container').text().trim();
@@ -54,10 +41,23 @@ app.get('/buscar', async (req, res) => {
                 urlProducto:urlImagenProcesada
             })
         });
+    }else{
+        //con la descripcion encontro 1 solo resultado. De esta manera la pagina tiene otra estructura
+        const nombre = $('.base').text().trim()
+        //const precio = $('span.price-wrapper.price-including-tax > span.price').first().text().trim();
+        const precio = $('span.price-wrapper.price-including-tax > span.price').eq(1).text().trim();
+
+        let urlImagenProcesada = ''
+
+        productos.push({
+            origen: 'Cetrogar',
+            nombre:nombre,
+            precio:precio,
+            urlProducto:urlImagenProcesada
+        })
     }
 
     
-
     res.json(productos);
   } catch (error) {
     res.status(500).json({ error: 'Error al buscar en Cetrogar', detalle: error.message });
