@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar en Cetrogar</title>
+</head>
+
+<body>
+    <h2>Buscar productos en Cetrogar</h2>
+    <input type="text" id="producto" placeholder="Ej: heladera">
+    <button onclick="buscar()">Buscar</button>
+
+    <div id="resultados"></div>
+
+    <script>
+        async function buscar() {
+            const q = document.getElementById('producto').value;
+            const res = await fetch(`http://localhost:3000/buscar?producto=${encodeURIComponent(q)}`);
+            const data = await res.json();
+            const div = document.getElementById('resultados');
+            div.innerHTML = '';
+
+            data.resultados.forEach(p => {
+                div.innerHTML += `
+          <div style="margin-bottom:10px;">
+            <strong>${p.titulo}</strong><br>
+            Precio: ${p.precio}<br>
+            <img src="${p.imagen}" style="max-width:100px;"><br>
+            <a href="${p.enlace}" target="_blank">Ver en Cetrogar</a>
+          </div>
+        `;
+            });
+        }
+    </script>
+</body>
+
+</html>
