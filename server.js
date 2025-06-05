@@ -4,6 +4,8 @@ const cheerio = require('cheerio');
 const cors = require('cors');
 const { buscarEnCetrogar } = require('./controlador/cetrogar.js');
 const { buscarEnMercadoLibre } = require('./controlador/mercadoLibre.js');
+const { buscarEnFravega } = require('./controlador/fravega.js');
+const { buscarEnChemesweb } = require('./controlador/chemes.js');
 
 const app = express();
 app.use(cors());
@@ -15,8 +17,10 @@ app.get('/buscar', async (req, res) => {
     try {
         const resultadosCetro = await buscarEnCetrogar(query);
         const resultadosML = await buscarEnMercadoLibre(query);
+        const resultadosFra = await buscarEnFravega(query);
+        const resultadosChe = await buscarEnChemesweb(query);
 
-        const resultadoFinal = [...resultadosCetro, ...resultadosML];
+        const resultadoFinal = [...resultadosCetro, ...resultadosML, ...resultadosFra, ...resultadosChe];
 
         res.json(resultadoFinal);
     } catch (error) {

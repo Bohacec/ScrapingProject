@@ -2,7 +2,6 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 async function buscarEnMercadoLibre(query) {
-
   const url = `https://listado.mercadolibre.com.ar/${encodeURIComponent(query)}`;
 
   try {
@@ -18,14 +17,21 @@ async function buscarEnMercadoLibre(query) {
     $('.poly-card').each(function () {
       const nombre = $(this).find('.poly-component__title').text().trim();
       const precio = $(this).find('.poly-price__current .andes-money-amount__fraction').first().text().trim();
-      const urlImagen = $(this).find('.poly-card__portada img').attr('src');
+
+      const imgTag = $(this).find('.poly-card__portada img');
+      let urlImagen = imgTag.attr('data-src') || imgTag.attr('src') || '';
+
+      // Evita agregar imágenes en base64 (placeholders)
+      if (urlImagen.startsWith('data:image')) {
+        urlImagen = '';
+      }
 
       if (nombre && precio && urlImagen) {
         productos.push({
           origen: 'MercadoLibre',
-          nombre: nombre,
-          precio: precio,
-          urlImagen: urlImagen,
+          nombre,
+          precio,
+          urlImagen
         });
       }
     });
