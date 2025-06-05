@@ -17,10 +17,11 @@ app.get('/buscar', async (req, res) => {
     try {
         const resultadosCetro = await buscarEnCetrogar(query);
         const resultadosML = await buscarEnMercadoLibre(query);
-        const resultadosFra = await buscarEnFravega(query);
-        const resultadosChe = await buscarEnChemesweb(query);
+        //const resultadosFra = await buscarEnFravega(query);
+        //const resultadosChe = await buscarEnChemesweb(query);
 
-        const resultadoFinal = [...resultadosCetro, ...resultadosML, ...resultadosFra, ...resultadosChe];
+        //const resultadoFinal = [...resultadosCetro, ...resultadosML, ...resultadosFra, ...resultadosChe];
+        const resultadoFinal = [...resultadosCetro, ...resultadosML];
 
         res.json(resultadoFinal);
     } catch (error) {
