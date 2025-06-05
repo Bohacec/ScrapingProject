@@ -17,13 +17,12 @@ app.get('/buscar', async (req, res) => {
     try {
         const resultadosCetro = await buscarEnCetrogar(query);
         const resultadosML = await buscarEnMercadoLibre(query);
-        //const resultadosFra = await buscarEnFravega(query);
-        //const resultadosChe = await buscarEnChemesweb(query);
+        const resultadosFra = await buscarEnFravega(query);
+        const resultadosChe = await buscarEnChemesweb(query);
 
-        //const resultadoFinal = [...resultadosCetro, ...resultadosML, ...resultadosFra, ...resultadosChe];
-        const resultadoFinal = [...resultadosCetro, ...resultadosML];
+        const resultadoFinal = [...resultadosCetro, ...resultadosML, ...resultadosFra, ...resultadosChe];
 
-        res.json(resultadoFinal);
+        res.json({version:"1.1.0",data:resultadoFinal});
     } catch (error) {
         res.status(500).json({ error: 'Error general de búsqueda', detalle: error.message });
     }
