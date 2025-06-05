@@ -2,66 +2,26 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const cors = require('cors');
+const { buscarEnCetrogar } = require('./controlador/cetrogar.js');
+const { buscarEnMercadoLibre } = require('./controlador/mercadoLibre.js');
 
 const app = express();
 app.use(cors());
 
 app.get('/buscar', async (req, res) => {
-  const query = req.query.producto;
-  if (!query) return res.status(400).json({ error: 'Falta el parámetro "producto"' });
+    const query = req.query.producto;
+    if (!query) return res.status(400).json({ error: 'Falta el parámetro "producto"' });
 
-  //Cetrogar
-  const url = `https://www.cetrogar.com.ar/catalogsearch/result/?q=${encodeURIComponent(query)}`;
+    try {
+        const resultadosCetro = await buscarEnCetrogar(query);
+        const resultadosML = await buscarEnMercadoLibre(query);
 
-  try {
-    const response = await axios.get(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
+        const resultadoFinal = [...resultadosCetro, ...resultadosML];
 
-    const $ = cheerio.load(response.data);
-    const productos = [];
-
-    if($('.base').text().trim().includes('Resultados de búsqueda para')){
-        //son varios resultados
-        $('li.item.product').each(function() {
-            const nombre = $(this).find('.product-item-name .name-container').text().trim();
-            const precio = $(this).find('.price-final_price .final-price .price').first().text().trim();
-            const urlImagen = $(this).find('.product-image-photo').attr('src');
-            let urlImagenProcesada = ''
-            //const urlProducto = $(this).find('a.product-item-info').attr('href');
-
-            if(urlImagen !== undefined){
-                urlImagenProcesada = urlImagen.split("?")[0]
-            }
-
-            productos.push({
-                origen: 'Cetrogar',
-                nombre:nombre,
-                precio:precio,
-                urlProducto:urlImagenProcesada
-            })
-        });
-    }else{
-        //con la descripcion encontro 1 solo resultado. De esta manera la pagina tiene otra estructura
-        const nombre = $('.base').text().trim()
-        //const precio = $('span.price-wrapper.price-including-tax > span.price').first().text().trim();
-        const precio = $('span.price-wrapper.price-including-tax > span.price').eq(1).text().trim();
-
-        let urlImagenProcesada = ''
-
-        productos.push({
-            origen: 'Cetrogar',
-            nombre:nombre,
-            precio:precio,
-            urlProducto:urlImagenProcesada
-        })
+        res.json(resultadoFinal);
+    } catch (error) {
+        res.status(500).json({ error: 'Error general de búsqueda', detalle: error.message });
     }
-
-    
-    res.json(productos);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al buscar en Cetrogar', detalle: error.message });
-  }
 });
 
 const PORT = process.env.PORT || 3000;
